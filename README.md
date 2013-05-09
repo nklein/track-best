@@ -32,6 +32,20 @@ The `keyword-args` can be any of the following:
   than the best items.  This argument defaults to `T`.  Note: This
   argument is evaluated at macroexpansion time, not at runtime.
 
+The other useful entry point is the `MAP-BEST` which takes a function
+and an optional tracker.  It calls the function for each item
+currently in the best list of the tracker (from best to worst).
+`MAP-BEST` passes two parameters to the function: the item and its
+score.  The `MAP-BEST` function returns a list of the results of those
+function calls.
+
+    (with-track-best (:keep 3 :return-best nil)
+      (dolist (v '(-5 -3 -1 0 2 4))
+        (track v (abs v)))
+      (map-best #'(lambda (item score)
+                    (* item score))))
+    => '(-25 16 -9)
+
 ## Example: Finding the longest matching substring in two strings
 
 Given two strings `S1` and `S2`, find the longest substring they have
@@ -99,8 +113,9 @@ altitude in each state and find the state with the lowest high.
 
      => (values '("Alaska" "Fairbanks") 531)
 
-The inner `DOLIST` here tracks the highest city in a given state.  The
-outer `DOLIST` trackes the lowest of the highest cities.
+The inner `WITH-TRACK-BEST` here tracks the highest city in a given
+state.  The outer `WITH-TRACK-BEST` trackes the lowest of the highest
+cities.
 
 ## Example: Finding the lowest and highest numbers in a list
 
@@ -116,8 +131,8 @@ and highest number from the list.
           (track v v lowest)
           (track v v highest))
 
-        (list (first (map-best #'cons lowest))
-              (first (map-best #'cons highest)))))
+        (list (caar (map-best #'cons lowest))
+              (caar (map-best #'cons highest)))))
 
 In this example, we used the `:NAME` to specify two different
 trackers.  In our loop, we tracked each value with both trackers.  In

@@ -7,4 +7,5 @@
 (in-package :track-best-tests)
 
 (defun run-tests ()
-  (nst:nst-cmd :run-package :track-best-tests))
+  (let ((*print-pretty* t))
+    (nst:nst-cmd :run-package :track-best-tests)))

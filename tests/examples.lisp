@@ -27,6 +27,13 @@
                                  ("Tuscon"  2641)))))
 
 (nst:def-test-group examples ()
+  (nst:def-test map-best (:equalp '(-25 16 -9))
+    (with-track-best (:keep 3 :return-best nil)
+      (dolist (v '(-5 -3 -1 0 2 4))
+        (track v (abs v)))
+      (map-best #'(lambda (item score)
+                    (* item score)))))
+
   (nst:def-test longest-substring (:drop-values (:equal " Friday"))
     (let ((s1 "Keep playing cards on Friday.  Get smart.")
           (s2 "Thank G-d it's Friday!"))
@@ -68,13 +75,13 @@
                 (track (first city-info) (second city-info))))
           (track (list (first state-info) city) altitude)))))
 
-  (nst:def-test lowest-and-highest (:seq (:equalp '(1 . 1))
-                                         (:equalp '(10 . 10)))
+  (nst:def-test lowest-and-highest (:seq (:equal 1)
+                                         (:equal 10))
     (with-track-best (:name lowest :order-by-fn #'< :return-best nil)
       (with-track-best (:name highest :return-best nil)
         (dolist (v '(2 4 6 8 10
                      1 3 5 7 9))
           (track v v lowest)
           (track v v highest))
-        (list (first (map-best #'cons lowest))
-              (first (map-best #'cons highest)))))))
+        (list (caar (map-best #'cons lowest))
+              (caar (map-best #'cons highest)))))))
