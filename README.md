@@ -24,9 +24,11 @@ The `keyword-args` can be any of the following:
 * `:ORDER-BY-FN function-to-compare-scores` --- The function used to
   determine if one score is larger or smaller than another score.  The
   default for this argument is `#'>`
-* `:SINGLE t-or-nil` --- If `single` is true and `keep` is `1`, then
-  only return the best item rather than a list containing the best
-  item.  The default for this argument is `T`.
+* `:ALWAYS-RETURN-LIST t-or-nil` --- If `always-return-list` is true,
+  then `WITH-TRACK-BEST` will return a list even when `KEEP` is `1`.
+  If `always-return-list` is not true, then `WITH-TRACK-BEST` will
+  return the single item when `KEEP` is `1`.  The default for this
+  argument is `NIL`.
 * `:RETURN-BEST t-or-nil` --- if `return-best` is `NIL`, then the form
   returns the value(s) from the last expression in the `body` rather
   than the best items.  This argument defaults to `T`.  Note: This
