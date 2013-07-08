@@ -21,6 +21,9 @@ The `keyword-args` can be any of the following:
   tracker in the `body` statements.
 * `:KEEP number-to-keep` --- The number of items to track.  This
   defaults to `1` item.
+* `:KEEP-TIES whether-to-keep-ties` --- If true, then items with the
+  same score will all be kept until there are KEEP items with better
+  scores.  This defaults to 'NIL'.
 * `:ORDER-BY-FN function-to-compare-scores` --- The function used to
   determine if one score is larger or smaller than another score.  The
   default for this argument is `#'>`
@@ -142,6 +145,20 @@ the end, we also used the `:RETURN-RESULTS NIL` directive so that the
 returned value would be our `LIST` expression rather than the best
 result from the `LOWEST` tracker.
 
+
+## Example: Keeping ties
+
+If the `:KEEP-TIES` parameter is not NIL, then all items with the best
+score will be returned.  The order of these items is not guaranteed.
+
+    (with-track-best (:keep-ties t)
+      (dolist (c '((:FIVE 5)  (:EIGHT 8)
+                   (:CINQO 5) (:OCHO 8)
+                   (:CINQ 5)  (:HUIT 8)))
+        (track (first c) (second c))))
+
+    => (values '(:EIGHT :HUIT :OCHO) '(8 8 8))
+
 ## Warning about how ties are handled
 
 If the `:KEEP` parameter is `1`, the first item tracked with the best
@@ -179,4 +196,4 @@ to this:
   at the time of insertion.
 * More importantly, I make no guarantee that this order will be
   preserved across releases.  You should not depend on particular
-  behavior when `:KEEP` is greater than one.
+  behavior when `:KEEP` is greater than one and ':KEEP-TIES' is NIL.

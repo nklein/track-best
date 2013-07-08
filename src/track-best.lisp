@@ -4,6 +4,7 @@
 
 (defmacro with-track-best ((&key (name nil)
                                  (keep 1)
+                                 (keep-ties nil)
                                  (order-by-fn #'>)
                                  (always-return-list nil)
                                  (return-best t))
@@ -12,6 +13,7 @@
         (scores (gensym "SCORES-")))
     `(let* ((*current-best-tracker* (make-best-tracker
                                      :keep ,keep
+                                     :keep-ties ,keep-ties
                                      :order-by-fn ,order-by-fn))
             ,@(when name
                 `((,name *current-best-tracker*))))
@@ -28,11 +30,11 @@
                  ((null ,items)
                   (values nil nil))
 
-                 ;; If we are only tracking one item and we don't
+                 ;; If we only ended up with one item and we don't
                  ;; always need to return a list, just return the
                  ;; first item and score.
                  ((and (not ,always-return-list)
-                       (= (best-tracker-keep *current-best-tracker*) 1))
+                       (null (rest ,items)))
                   (values (first ,items) (first ,scores)))
 
                  ;; Otherwise, return all of the items and scores.

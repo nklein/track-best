@@ -1,4 +1,4 @@
-;;; examples.lisp
+;;; examples.lis
 
 (in-package :track-best-tests)
 
@@ -84,4 +84,18 @@
           (track v v lowest)
           (track v v highest))
         (list (caar (map-best #'cons lowest))
-              (caar (map-best #'cons highest)))))))
+              (caar (map-best #'cons highest))))))
+
+  (nst:def-test keep-ties (:values (:seq (:equal :EIGHT)
+                                         (:equal :HUIT)
+                                         (:equal :OCHO))
+                                   (:seq (:equal 8)
+                                         (:equal 8)
+                                         (:equal 8)))
+    (multiple-value-bind (l v)
+        (with-track-best (:keep-ties t)
+          (dolist (c '((:FIVE 5)  (:EIGHT 8)
+                       (:CINQO 5) (:OCHO 8)
+                       (:CINQ 5)  (:HUIT 8)))
+            (track (first c) (second c))))
+      (values (sort l #'string< :key #'symbol-name) v))))

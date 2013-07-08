@@ -2,35 +2,62 @@
 
 (in-package #:track-best)
 
-(defun insert-tracked-item (tracker item &optional always)
-  "Insert the ITEM into the TRACKER.  If ALWAYS is true, then do it even though it is not bigger than the last thing in the array."
-  (with-slots (best order-by-fn) tracker
-    (let ((size  (array-total-size best))
-          (score (best-item-score item)))
-      (labels ((ti> (n)
-                 "Returns whether tracked-item is bigger than (aref best n)"
-                 (funcall order-by-fn
-                          score
-                          (best-item-score (aref best n))))
+(defun insert-tracked-item (tracker item score)
+  "Insert the ITEM with the given SCORE into the TRACKER."
+  (with-slots (best size keep keep-ties order-by-fn) tracker
+    (labels ((t< (score best)
+               (funcall order-by-fn (best-item-list-score best) score))
+             (t> (score best)
+               (funcall order-by-fn score (best-item-list-score best)))
 
-               (make-room (at)
-                 "Moves everything from AT to then end of BEST down one."
-                 (loop :for index :from (1- size) :above at
-                    :do (setf (aref best index)
-                              (aref best (1- index))))
-                 at)
+             (insertable? ()
+               (or (< size keep)
+                   (t> score (first best))
+                   (and keep-ties (not (t< score (first best))))))
 
-               (insert-tracked-item (low high)
-                 "Binary search between LOW and HIGH for a place for the
-                TRACKED-ITEM.  Insert it once a place is found."
-                 (let ((mid (truncate (/ (+ low high) 2))))
+             (new-best-item-list ()
+               (make-best-item-list :size 1
+                                    :score score
+                                    :items (list item)))
+
+             (insert-tracked-item (best-list)
+               (cond
+                 ((null best-list)
+                  (incf size)
+                  (list (new-best-item-list)))
+                 (t (destructuring-bind (best . rest) best-list
+                      (cond
+                        ((t< score best)
+                         (incf size)
+                         (list* (new-best-item-list) best-list))
+                        ((t> score best)
+                         (let ((tail (insert-tracked-item rest)))
+                           (if (eq tail rest)
+                               best-list
+                               (list* best tail))))
+                        (t (incf size)
+                           (push item (best-item-list-items best))
+                           (incf (best-item-list-size best))
+                           best-list))))))
+
+             (trim-excess (best-list)
+               (destructuring-bind (best . rest) best-list
+                 (let ((cur-size (best-item-list-size best)))
                    (cond
-                     ((= low high) (setf (aref best (make-room low)) item))
+                     ((and keep-ties (<= keep (- size cur-size)))
+                      (decf size cur-size)
+                      rest)
+                     ((and (not keep-ties) (< keep size))
+                      (decf size)
+                      (cond
+                        ((< 1 cur-size)
+                         (decf (best-item-list-size best))
+                         (setf (best-item-list-items best)
+                               (rest (best-item-list-items best)))
+                         best-list)
+                        (t rest)))
+                     (t best-list))))))
 
-                     ((ti> mid) (insert-tracked-item low mid))
-
-                     (t  (insert-tracked-item (1+ mid) high))))))
-
-        (when (or always
-                  (ti> (1- size)))
-          (insert-tracked-item 0 (1- size)))))))
+      (when (insertable?)
+        (setf best (trim-excess (insert-tracked-item best))))))
+  tracker)
