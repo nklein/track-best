@@ -14,3 +14,19 @@
                              (:file "insert")
                              (:file "methods")
                              (:file "track-best")))))
+
+(asdf:defsystem #:track-best-tests
+  :description "Tests for the track-best library."
+  :author "Patrick Stein <pat@nklein.com>"
+  :version "0.1.20130509"
+  :license "Free"
+  :depends-on (#:track-best #:nst)
+  :components ((:module "tests"
+                :components ((:file "package")
+                             (:file "basics" :depends-on ("package"))
+                             (:file "examples" :depends-on ("package"))))))
+
+(defmethod asdf:perform ((op asdf:test-op)
+                         (system (eql (asdf:find-system :track-best))))
+  (asdf:load-system :track-best-tests)
+  (funcall (find-symbol (symbol-name :run-tests) :track-best-tests)))
