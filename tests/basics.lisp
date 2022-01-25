@@ -1,12 +1,20 @@
 ;;; examples.lisp
 
-(in-package :track-best-tests)
+(in-package :track-best/tests)
+
+(defun from-a-function ()
+  (with-track-best ()
+    (dolist (v '(1 3 5 -10 -5 -4 6 7))
+      (track v (abs v)))))
 
 (nst:def-test-group basics ()
   (nst:def-test nominal-case (:values (:equal -10) (:equal 10))
     (with-track-best ()
       (dolist (v '(1 3 5 -10 -5 -4 6 7))
         (track v (abs v)))))
+
+  (nst:def-test nominal-case-from-a-function (:values (:equal -10) (:equal 10))
+    (from-a-function))
 
   (nst:def-test no-results-case (:values (:equal nil) (:equal nil))
     (with-track-best ()))

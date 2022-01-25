@@ -3,8 +3,9 @@
 (asdf:defsystem #:track-best
   :description "Macros/functions for tracking the best items.  See the README.md for more details."
   :author "Patrick Stein <pat@nklein.com>"
-  :version "0.1.20130509"
+  :version "0.1.20220124"
   :license "Free"
+  :in-order-to ((asdf:test-op (asdf:test-op :track-best/tests)))
   :components ((:static-file "README.md")
                (:module "src"
                 :serial t
@@ -15,18 +16,15 @@
                              (:file "methods")
                              (:file "track-best")))))
 
-(asdf:defsystem #:track-best-tests
+(asdf:defsystem #:track-best/tests
   :description "Tests for the track-best library."
   :author "Patrick Stein <pat@nklein.com>"
-  :version "0.1.20130509"
+  :version "0.1.20220124"
   :license "Free"
-  :depends-on (#:track-best #:nst)
+  :depends-on ((:version #:track-best "0.1.20220124") #:nst)
   :components ((:module "tests"
                 :components ((:file "package")
                              (:file "basics" :depends-on ("package"))
-                             (:file "examples" :depends-on ("package"))))))
-
-(defmethod asdf:perform ((op asdf:test-op)
-                         (system (eql (asdf:find-system :track-best))))
-  (asdf:load-system :track-best-tests)
-  (funcall (find-symbol (symbol-name :run-tests) :track-best-tests)))
+                             (:file "examples" :depends-on ("package")))))
+  :perform (asdf:test-op (o c)
+             (uiop:symbol-call :track-best/tests :run-tests)))

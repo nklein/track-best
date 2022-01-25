@@ -5,7 +5,7 @@
 (defmacro with-track-best ((&key (name nil)
                                  (keep 1)
                                  (keep-ties nil)
-                                 (order-by-fn #'>)
+                                 (order-by-fn '#'>)
                                  (always-return-list nil)
                                  (return-best t))
                            &body body)

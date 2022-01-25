@@ -1,6 +1,6 @@
 ;;; examples.lis
 
-(in-package :track-best-tests)
+(in-package :track-best/tests)
 
 (nst:def-fixtures test-vertexes ()
   (+octohedron-vertexes+ '(#( 1  0  0)
